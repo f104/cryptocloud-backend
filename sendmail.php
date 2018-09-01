@@ -1,7 +1,7 @@
 <?php
 
+use PHPMailer\PHPMailer\PHPMailer;
 require_once dirname(__FILE__) . '/vendor/autoload.php';
-
 
 $success = FALSE;
 $message = '';
@@ -16,7 +16,7 @@ if (!file_exists($config)) {
     response(false, 'Config file not found');
 }
 require $config;
-if (!isset($address) or !isset($subject)) {
+if (!isset($address_to) or !isset($address_from) or !isset($subject)) {
     response(false, 'Config incorrect');
 }
 if (empty($_REQUEST)) {
@@ -27,14 +27,15 @@ if (!empty($_REQUEST['email']) or !empty($_REQUEST['text']) or !empty($_REQUEST[
 }
 
 $body = '';
-foreach ($_REQUEST as $k => $v) {
-    if (!empty($v)) {
-        $body .= "$k: $v".PHP_EOL;
+foreach (['name' => 'name', 'currency' => 'currency', 'email2' => 'email', 'location' => 'location', 'amount' => 'amount'] as $k => $name) {
+    if (!empty($_REQUEST[$k])) {
+        $body .= "$name: {$_REQUEST[$k]}".PHP_EOL;
     }
 }
 
 $mail = new PHPMailer;
-$mail->addAddress($address);
+$mail->addAddress($address_to);
+$mail->setFrom($address_from);
 $mail->isHTML(false);
 $mail->Subject = $subject;
 $mail->Body = $body;
